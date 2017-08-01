@@ -1,0 +1,1 @@
+export { DropdownSearchModule } from './ngx-dropdown-search.module';
