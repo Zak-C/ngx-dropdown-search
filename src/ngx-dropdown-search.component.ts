@@ -1,16 +1,17 @@
 import { Component, OnInit, ViewChild, Input, Output, EventEmitter } from '@angular/core';
 
 @Component({
-    selector: 'dropdown-search-selector',
+    selector: 'ngx-dropdown-search',
     template: `
-        <div class="form-group">
+        <div class="form-group" [ngStyle]="{'max-width': maxWidth}" (mouseover)="elementCurrentlyHasFocus = true" (mouseleave)="elementCurrentlyHasFocus = false">
             <div class="selector-container">
-                <textarea #textarea class="form-control textarea-selector" rows="1" [placeholder]="selectedItem ? '' : placeholder" (blur)="hideResults()"
+                <textarea #textarea class="form-control textarea-selector" rows="1" [placeholder]="selectedItem ? '' : placeholder" (click)="displayResultsAndApplyFilter()" (blur)="hideResults()"
                 [disabled]="selectedItem || disabled || loading" (keyup)="displayResultsAndApplyFilter()" [(ngModel)]="searchFilter"></textarea>
-                <span class="drop-menu" *ngIf="!selectedItem && !disabled && !loading" (mousedown)="$event.preventDefault()" (click)="toggleResultsDisplay()"><i class="fa fa-caret-down caret-down-selector" aria-hidden="true"></i></span>
+                <span class="drop-menu" *ngIf="!selectedItem && !disabled && !loading && !searchFilter" (mousedown)="$event.preventDefault()" (click)="toggleResultsDisplay()"><i class="fa fa-caret-down caret-down-selector" aria-hidden="true"></i></span>
                 <span class="drop-menu-disabled" *ngIf="!selectedItem && disabled && !loading"><i class="fa fa-caret-down caret-down-selector" aria-hidden="true"></i></span>
                 <span class="drop-menu-disabled" *ngIf="!selectedItem && !disabled && loading"><i class="fa fa-spinner fa-pulse fa-fw"></i></span>
-                <span class="drop-menu" *ngIf="selectedItem" (click)="resetSelectedItem()"><i class="fa fa-times" aria-hidden="true"></i></span>
+                <span class="drop-menu" *ngIf="selectedItem" (mousedown)="$event.preventDefault()" (click)="resetSelectedItem()"><i class="fa fa-times" aria-hidden="true"></i></span>
+                <span class="drop-menu" *ngIf="!selectedItem && !loading && !disabled && searchFilter" (click)="resetFilter()"><i class="fa fa-times" aria-hidden="true"></i></span>
             </div>
             
             <div *ngIf="displayValidationMessage && validationMessage != ''" class="alert alert-danger">
@@ -29,7 +30,7 @@ import { Component, OnInit, ViewChild, Input, Output, EventEmitter } from '@angu
                 <i class="fa fa-times" aria-hidden="true" (click)="resetSelectedItem()"></i>
             </div> -->
             
-            <div class="results-container" *ngIf="displayResults" (mousedown)="$event.preventDefault()">
+            <div class="results-container" *ngIf="displayResults" (mousedown)="preventBlur($event)" (mouseup)="preventBlur($event)">
                 <div *ngFor="let agent of filteredResults">
                 <p class="result-item" (click)="setItem($event, agent)">{{agent.name}}</p>
                 </div>
@@ -40,24 +41,14 @@ import { Component, OnInit, ViewChild, Input, Output, EventEmitter } from '@angu
         </div>
     `,
     styles: [`
-        //Colours
-        $drop-menu-gradient-end: #f2f2f2;
-        $drop-menu-disabled-gradient-start:#e0dede;
-        $drop-menu-disabled-gradient-end:#c7c6c6;
-        $grey-border: #ccc;
-        $caret-colour: #333;
-        $result-item-hover-colour: #eee;
-        $selected-item-background-colour: #fafafa;
-        $conditional-message-colour: #999999;
-        //
         .form-group {
         margin: 0;
-        max-width: 300px;
+        max-width: 100%;
         position: relative;
         }
         
         .selector-container {
-        max-width: 300px;
+        max-width: 100%;
         width: 100%;
         position: relative;
         }
@@ -65,15 +56,16 @@ import { Component, OnInit, ViewChild, Input, Output, EventEmitter } from '@angu
         .textarea-selector {
         resize: none;
         padding-right: 34px;
+        overflow-x: hidden;
         }
         
         .drop-menu {
-        background: linear-gradient(to bottom, white 0, $drop-menu-gradient-end 100%);
-        border-color: $grey-border;
+        background: linear-gradient(to bottom, white 0, #f2f2f2 100%);
+        border-color: #ccc;
         border-radius: 3px;
         border-style: solid;
         border-width: 1px;
-        color: $caret-colour;
+        color: #333;
         cursor: pointer;
         display: inline-block;
         font-size: 14px;
@@ -107,8 +99,42 @@ import { Component, OnInit, ViewChild, Input, Output, EventEmitter } from '@angu
         }
         
         .drop-menu-disabled {
-        @extend.drop-menu;
-        background: linear-gradient(to bottom, $drop-menu-disabled-gradient-start 0, $drop-menu-disabled-gradient-end 100%);
+        background: linear-gradient(to bottom, #e0dede 0, #c7c6c6 100%);
+        border-color: #ccc;
+        border-radius: 3px;
+        border-style: solid;
+        border-width: 1px;
+        color: #333;
+        cursor: pointer;
+        display: inline-block;
+        font-size: 14px;
+        font-family: inherit;
+        font-variant: normal;
+        line-height: 20px;
+        margin: 0 10px 0 0;
+        padding: 4px 10px;
+        text-decoration: none;
+        text-shadow: 0 1px 0 white;
+        -moz-box-sizing: border-box;
+        -webkit-box-sizing: border-box;
+        -ms-box-sizing: border-box;
+        box-sizing: border-box;
+        -moz-border-radius-bottomleft: 0;
+        border-bottom-left-radius: 0;
+        -moz-border-radius-topleft: 0;
+        border-top-left-radius: 0;
+        border-top: 0;
+        border-right: 0;
+        border-bottom: 0;
+        display: block;
+        height: auto;
+        margin: 0;
+        padding: 4px 0;
+        position: absolute;
+        right: 1px;
+        top: 1px;
+        bottom: 1px;
+        width: 23px;
         }
         
         .drop-menu-disabled .fa-spinner {
@@ -125,7 +151,7 @@ import { Component, OnInit, ViewChild, Input, Output, EventEmitter } from '@angu
         }
         
         .results-container {
-        max-width: 300px;
+        max-width: 100%;
         width: 100%;
         border: 1px solid lightgrey;
         background-color: white;
@@ -144,7 +170,7 @@ import { Component, OnInit, ViewChild, Input, Output, EventEmitter } from '@angu
         
         .results-container p.result-item:hover {
         cursor: pointer;
-        background-color: $result-item-hover-colour;
+        background-color: #eee;
         }
         
         .selected-item {
@@ -166,11 +192,11 @@ import { Component, OnInit, ViewChild, Input, Output, EventEmitter } from '@angu
         position: absolute;
         top: 5px;
         left: 27px;
-        border: solid 1px $grey-border;
+        border: solid 1px #cccccc;
         border-radius: 3px;
-        background-color: $selected-item-background-colour;
+        background-color: #fafafa;
         padding: 1px 5px;
-        max-width: 252px;
+        max-width: calc(100% - 47px);
         }
         
         .selected-items p {
@@ -194,7 +220,7 @@ import { Component, OnInit, ViewChild, Input, Output, EventEmitter } from '@angu
         .conditional-message {
         font-size: 0.85em;
         margin-top: 5px;
-        color: $conditional-message-colour;
+        color: #999999;
         }
         
         .alert-danger {
@@ -216,6 +242,7 @@ export class DropdownSearchSelectorComponent implements OnInit {
     @Input() validationMessage = '';
     @Input() loading = false;
     @Input() selectedItem: any;
+    @Input() maxWidth = '100%';
 
     @Output() itemSelected = new EventEmitter<any>();
     @Output() itemDeselected = new EventEmitter<any>();
@@ -226,7 +253,7 @@ export class DropdownSearchSelectorComponent implements OnInit {
     public filteredResults: any;;
     public searchFilter: string;
     public displayValidationMessage = false;
-    private resultsIntialised = false;
+    private elementCurrentlyHasFocus = false;
 
     constructor() { }
 
@@ -236,25 +263,25 @@ export class DropdownSearchSelectorComponent implements OnInit {
 
     public toggleResultsDisplay(): void {
         if (this.displayResults) {
-            this.hideResults();
+            this.hideResults(true);
+            this.textarea.nativeElement.blur();
         } else {
             this.focusTextareaAndShowResults();
         }
     }
 
     public focusTextareaAndShowResults(): void {
-        if (!this.resultsIntialised) {
-            this.filteredResults = this.resultSet;
-            this.resultsIntialised = true;
-        }
+        this.filteredResults = this.resultSet;
         this.textarea.nativeElement.focus();
         this.displayResults = true;
     }
 
-    public hideResults(): void {
-        this.displayResults = false;
-        this.searchFilter = '';
-        this.filteredResults = this.resultSet;
+    public hideResults(ignoreFocus = false): void {
+        if (!this.elementCurrentlyHasFocus || ignoreFocus) {
+            this.displayResults = false;
+            this.searchFilter = '';
+            this.filteredResults = this.resultSet;
+        }
     }
 
     public setItem(event: Event, item: any) {
@@ -270,11 +297,18 @@ export class DropdownSearchSelectorComponent implements OnInit {
     public resetSelectedItem(): void {
         this.itemDeselected.emit(this.selectedItem);
         this.selectedItem = null;
+        setTimeout(() => {
+            this.textarea.nativeElement.focus()
+        }, 0);
+
+        if (this.resultSet) {
+            this.displayResults = true;
+        }
     }
 
     public displayResultsAndApplyFilter(): void {
         this.displayResults = true;
-        if (this.searchFilter && this.searchFilter.length > 0) {
+        if (this.searchFilter && this.searchFilter.length > 0 && this.resultSet) {
             this.filteredResults = this.resultSet.filter((item: any) => {
                 return item[this.filterProperty].toLowerCase().includes(this.searchFilter.toLowerCase());
             })
@@ -290,5 +324,16 @@ export class DropdownSearchSelectorComponent implements OnInit {
             this.displayValidationMessage = true;
             return false;
         };
+    }
+
+    public preventBlur($event: Event) {
+        $event.preventDefault();
+        this.textarea.nativeElement.focus();
+    }
+
+    public resetFilter(): void {
+        this.searchFilter = '';
+        this.filteredResults = this.resultSet;
+        this.textarea.nativeElement.focus();
     }
 }
