@@ -1,6 +1,6 @@
 {
   "name": "ngx-dropdown-search",
-  "version": "0.0.14",
+  "version": "0.0.19",
   "description": "A configurable dropdown box with search functionality for Angular 4.",
   "main": "index.js",
   "repository": {

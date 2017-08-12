@@ -21,7 +21,7 @@ import { Component, OnInit, ViewChild, Input, Output, EventEmitter } from '@angu
             <p *ngIf="disabled" class="conditional-message">{{conditionalMessage}}</p>
             
             <div *ngIf="selectedItem" class="selected-item">
-                <p>{{selectedItem[displayProperty]}}</p>
+                <p>{{selectedItem[displayProperty]}}{{secondaryDisplayProperty ? ' ' + selectedItem[secondaryDisplayProperty] : ''}}</p>
             </div>
             
             <!-- Keeping this here for now - Styles and HTML for mutliple selections -->
@@ -31,8 +31,8 @@ import { Component, OnInit, ViewChild, Input, Output, EventEmitter } from '@angu
             </div> -->
             
             <div class="results-container" *ngIf="displayResults" (mousedown)="preventBlur($event)" (mouseup)="preventBlur($event)">
-                <div *ngFor="let agent of filteredResults">
-                <p class="result-item" (click)="setItem($event, agent)">{{agent.name}}</p>
+                <div *ngFor="let item of filteredResults">
+                <p class="result-item" (click)="setItem($event, item)">{{item[displayProperty]}}{{secondaryDisplayProperty ? ' ' + item[secondaryDisplayProperty] : ''}}</p>
                 </div>
                 <div *ngIf="!filteredResults || filteredResults.length == 0">
                 <p>{{noResultsMessage}}</p>
@@ -233,7 +233,9 @@ import { Component, OnInit, ViewChild, Input, Output, EventEmitter } from '@angu
 
 export class DropdownSearchSelectorComponent implements OnInit {
     @Input() displayProperty = 'name';
+    @Input() secondaryDisplayProperty = '';
     @Input() filterProperty = 'name';
+    @Input() secondaryFilterProperty = '';
     @Input() resultSet: any;
     @Input() placeholder: string;
     @Input() disabled = false;
@@ -310,7 +312,8 @@ export class DropdownSearchSelectorComponent implements OnInit {
         this.displayResults = true;
         if (this.searchFilter && this.searchFilter.length > 0 && this.resultSet) {
             this.filteredResults = this.resultSet.filter((item: any) => {
-                return item[this.filterProperty].toLowerCase().includes(this.searchFilter.toLowerCase());
+                return this.secondaryFilterProperty ? (item[this.filterProperty] + ' ' + item[this.secondaryFilterProperty]).toLowerCase().includes(this.searchFilter.toLowerCase()) :
+                    item[this.filterProperty].toLowerCase().includes(this.searchFilter.toLowerCase());
             })
         } else {
             this.filteredResults = this.resultSet;
