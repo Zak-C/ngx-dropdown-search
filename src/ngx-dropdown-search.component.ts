@@ -255,7 +255,7 @@ export class DropdownSearchSelectorComponent implements OnInit {
     public filteredResults: any;;
     public searchFilter: string;
     public displayValidationMessage = false;
-    private elementCurrentlyHasFocus = false;
+    public elementCurrentlyHasFocus = false;
 
     constructor() { }
 
