@@ -1,6 +1,6 @@
 {
   "name": "ngx-dropdown-search",
-  "version": "0.0.19",
+  "version": "0.0.20",
   "description": "A configurable dropdown box with search functionality for Angular 4.",
   "main": "index.js",
   "repository": {
@@ -28,7 +28,7 @@
   },
   "homepage": "https://github.com/Zak-C/ngx-dropdown-search#readme",
   "peerDependencies": {
-    "@angular/core": "^4.0.0"
+    "@angular/core": ">=4.0.0"
   },
   "devDependencies": {
     "@angular/core": "^4.0.2",
